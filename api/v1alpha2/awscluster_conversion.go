@@ -22,16 +22,52 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/conversion"
 )
 
+const (
+	unsupportedAWSClusterFieldsPrefix     = "unsupported-fields/awscluster.infrastructure.cluster.x-k8s.io/"
+	awsClusterImageLookupOrgAnnotation    = unsupportedAWSClusterFieldsPrefix + "ImageLookupOrg"
+	awsClusterImageLookupBaseOSAnnotation = unsupportedAWSClusterFieldsPrefix + "ImageLookupBaseOS"
+)
+
 // ConvertTo converts this AWSCluster to the Hub version (v1alpha3).
 func (src *AWSCluster) ConvertTo(dstRaw conversion.Hub) error { // nolint
 	dst := dstRaw.(*infrav1alpha3.AWSCluster)
-	return Convert_v1alpha2_AWSCluster_To_v1alpha3_AWSCluster(src, dst, nil)
+	if err := Convert_v1alpha2_AWSCluster_To_v1alpha3_AWSCluster(src, dst, nil); err != nil {
+		return err
+	}
+
+	// Restore the value of awsCluster.Spec.ImageLookupOrg if the annotation is present
+	imageLookupOrg, ok := src.Annotations[awsClusterImageLookupOrgAnnotation]
+	if ok {
+		dst.Spec.ImageLookupOrg = imageLookupOrg
+	}
+
+	// Restore the value of awsCluster.Spec.ImageLookupBaseOS if the annotation is present
+	imageLookupBaseOS, ok := src.Annotations[awsClusterImageLookupBaseOSAnnotation]
+	if ok {
+		dst.Spec.ImageLookupBaseOS = imageLookupBaseOS
+	}
+
+	return nil
 }
 
 // ConvertFrom converts from the Hub version (v1alpha3) to this version.
 func (dst *AWSCluster) ConvertFrom(srcRaw conversion.Hub) error { // nolint
 	src := srcRaw.(*infrav1alpha3.AWSCluster)
-	return Convert_v1alpha3_AWSCluster_To_v1alpha2_AWSCluster(src, dst, nil)
+	if err := Convert_v1alpha3_AWSCluster_To_v1alpha2_AWSCluster(src, dst, nil); err != nil {
+		return err
+	}
+
+	if src.Annotations == nil {
+		src.Annotations = make(map[string]string)
+	}
+
+	// Preserve the value of awsCluster.Spec.ImageLookupOrg as an annotation
+	src.Annotations[awsClusterImageLookupOrgAnnotation] = src.Spec.ImageLookupOrg
+
+	// Preserve the value of awsCluster.Spec.ImageLookupBaseOS as an annotation
+	src.Annotations[awsClusterImageLookupBaseOSAnnotation] = src.Spec.ImageLookupBaseOS
+
+	return nil
 }
 
 // ConvertTo converts this AWSClusterList to the Hub version (v1alpha3).
@@ -47,13 +83,13 @@ func (dst *AWSClusterList) ConvertFrom(srcRaw conversion.Hub) error { // nolint
 }
 
 // Convert_v1alpha3_AWSClusterSpec_To_v1alpha2_AWSClusterSpec converts from the Hub version (v1alpha3) of the AWSClusterSpec to this version.
-// Requires manual conversion as infrav1alpha3.AWSClusterSpec.ImageLookupOrg does not exist in AWSClusterSpec.
+// Requires manual conversion as infrav1alpha3.AWSClusterSpec.ImageLookupOrg and infrav1alpha3.AWSClusterSpec.ImageLookupBaseOS do not exist in AWSClusterSpec.
 func Convert_v1alpha3_AWSClusterSpec_To_v1alpha2_AWSClusterSpec(in *infrav1alpha3.AWSClusterSpec, out *AWSClusterSpec, s apiconversion.Scope) error { // nolint
 	if err := autoConvert_v1alpha3_AWSClusterSpec_To_v1alpha2_AWSClusterSpec(in, out, s); err != nil {
 		return err
 	}
 
-	// Discards ImageLookupOrg
+	// ImageLookupOrg and ImageLookupBaseOS are preserved by the AWSCluster ConvertTo/ConvertFrom methods
 
 	return nil
 }

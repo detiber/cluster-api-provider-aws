@@ -22,16 +22,42 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/conversion"
 )
 
+const (
+	unsupportedAWSMachineFieldsPrefix     = "unsupported-fields/awscluster.infrastructure.cluster.x-k8s.io/"
+	awsMachineImageLookupBaseOSAnnotation = unsupportedAWSMachineFieldsPrefix + "ImageLookupBaseOS"
+)
+
 // ConvertTo converts this AWSMachine to the Hub version (v1alpha3).
 func (src *AWSMachine) ConvertTo(dstRaw conversion.Hub) error { // nolint
 	dst := dstRaw.(*infrav1alpha3.AWSMachine)
-	return Convert_v1alpha2_AWSMachine_To_v1alpha3_AWSMachine(src, dst, nil)
+	if err := Convert_v1alpha2_AWSMachine_To_v1alpha3_AWSMachine(src, dst, nil); err != nil {
+		return err
+	}
+
+	// Restore the value of awsCluster.Spec.ImageLookupBaseOS if the annotation is present
+	imageLookupBaseOS, ok := src.Annotations[awsMachineImageLookupBaseOSAnnotation]
+	if ok {
+		dst.Spec.ImageLookupBaseOS = imageLookupBaseOS
+	}
+
+	return nil
 }
 
 // ConvertFrom converts from the Hub version (v1alpha3) to this version.
 func (dst *AWSMachine) ConvertFrom(srcRaw conversion.Hub) error { // nolint
 	src := srcRaw.(*infrav1alpha3.AWSMachine)
-	return Convert_v1alpha3_AWSMachine_To_v1alpha2_AWSMachine(src, dst, nil)
+	if err := Convert_v1alpha3_AWSMachine_To_v1alpha2_AWSMachine(src, dst, nil); err != nil {
+		return err
+	}
+
+	if src.Annotations == nil {
+		src.Annotations = make(map[string]string)
+	}
+
+	// Preserve the value of awsMachine.Spec.ImageLookupBaseOS as an annotation
+	src.Annotations[awsMachineImageLookupBaseOSAnnotation] = src.Spec.ImageLookupBaseOS
+
+	return nil
 }
 
 // ConvertTo converts this AWSMachineList to the Hub version (v1alpha3).
@@ -53,7 +79,7 @@ func Convert_v1alpha3_AWSMachineSpec_To_v1alpha2_AWSMachineSpec(in *infrav1alpha
 		return err
 	}
 
-	// Discards ImageLookupBaseOS
+	// ImageLookupBaseOS is preserved by the AWSMachine ConvertTo/ConvertFrom methods
 
 	return nil
 }

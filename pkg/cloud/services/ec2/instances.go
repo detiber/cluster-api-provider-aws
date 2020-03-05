@@ -212,15 +212,8 @@ func (s *Service) CreateInstance(scope *scope.MachineScope, userData []byte) (*i
 	// If SSHKeyName WAS NOT provided (nil) then use the defaultSSHKeyName
 	// If SSHKeyName WAS provided *but is an empty string*, do not set a key pair
 	// Otherwise (SSHKeyName WAS provided and is NOT an empty string), use the provided key pair name
-	if scope.AWSMachine.Spec.SSHKeyName != nil {
-		if *scope.AWSMachine.Spec.SSHKeyName != "" {
-			input.SSHKeyName = scope.AWSMachine.Spec.SSHKeyName
-		}
-	} else if scope.AWSCluster.Spec.SSHKeyName != nil {
-		if *scope.AWSCluster.Spec.SSHKeyName != "" {
-			input.SSHKeyName = scope.AWSCluster.Spec.SSHKeyName
-		}
-	} else {
+	input.SSHKeyName = s.scope.AWSCluster.Spec.SSHKeyName
+	if input.SSHKeyName == nil {
 		input.SSHKeyName = aws.String(defaultSSHKeyName)
 	}
 

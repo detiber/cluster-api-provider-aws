@@ -142,20 +142,16 @@ func (s *Service) getDefaultBastion() *infrav1.Instance {
 	// If SSHKeyName WAS NOT provided (nil) then use the defaultSSHKeyName
 	// If SSHKeyName WAS provided _but is an empty string_, do not set a key pair
 	// Otherwise (SSHKeyName WAS provided and is NOT an empty string), use the provided key pair name
-	var keyName string
-	if s.scope.AWSCluster.Spec.SSHKeyName != nil {
-		if *s.scope.AWSCluster.Spec.SSHKeyName != "" {
-			keyName = *s.scope.AWSCluster.Spec.SSHKeyName
-		}
-	} else {
-		keyName = defaultSSHKeyName
+	keyName := s.scope.AWSCluster.Spec.SSHKeyName
+	if keyName == nil {
+		keyName = aws.String(defaultSSHKeyName)
 	}
 
 	i := &infrav1.Instance{
 		Type:       "t2.micro",
 		SubnetID:   s.scope.Subnets().FilterPublic()[0].ID,
 		ImageID:    s.defaultBastionAMILookup(s.scope.AWSCluster.Spec.Region),
-		SSHKeyName: aws.String(keyName),
+		SSHKeyName: keyName,
 		UserData:   aws.String(base64.StdEncoding.EncodeToString([]byte(userData))),
 		SecurityGroupIDs: []string{
 			s.scope.Network().SecurityGroups[infrav1.SecurityGroupBastion].ID,

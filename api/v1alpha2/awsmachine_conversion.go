@@ -87,6 +87,9 @@ func Convert_v1alpha2_AWSMachineSpec_To_v1alpha3_AWSMachineSpec(in *AWSMachineSp
 	// Manually convert dst.Spec.FailureDomain.
 	out.FailureDomain = in.AvailabilityZone
 
+	// Manually convert SSHKeyName
+	out.SSHKeyName = &in.SSHKeyName
+
 	if in.CloudInit == nil {
 		out.CloudInit.InsecureSkipSecretsManager = true
 	} else if err := Convert_v1alpha2_CloudInit_To_v1alpha3_CloudInit(in.CloudInit, &out.CloudInit, s); err != nil {
@@ -113,6 +116,11 @@ func Convert_v1alpha3_AWSMachineSpec_To_v1alpha2_AWSMachineSpec(in *infrav1alpha
 	// Manually convert FailureDomain to AvailabilityZone.
 	out.AvailabilityZone = in.FailureDomain
 
+	// Manually convert SSHKeyName
+	if in.SSHKeyName != nil {
+		out.SSHKeyName = *in.SSHKeyName
+
+	}
 	out.CloudInit = &CloudInit{}
 	if err := Convert_v1alpha3_CloudInit_To_v1alpha2_CloudInit(&in.CloudInit, out.CloudInit, s); err != nil {
 		return err

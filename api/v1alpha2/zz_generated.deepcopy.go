@@ -267,11 +267,6 @@ func (in *AWSMachineSpec) DeepCopyInto(out *AWSMachineSpec) {
 		*out = new(AWSResourceReference)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.SSHKeyName != nil {
-		in, out := &in.SSHKeyName, &out.SSHKeyName
-		*out = new(string)
-		**out = **in
-	}
 	if in.NetworkInterfaces != nil {
 		in, out := &in.NetworkInterfaces, &out.NetworkInterfaces
 		*out = make([]string, len(*in))

@@ -35,10 +35,7 @@ type AWSClusterSpec struct {
 	// The AWS Region the cluster lives in.
 	Region string `json:"region,omitempty"`
 
-	// SSHKeyName is the name of the ssh key to attach to the bastion host.
-	// If nil, will use a default SSH key pair name
-	// If empty string, will NOT set an SSH key pair
-	// Otherwise, will set the SSH key pair name
+	// SSHKeyName is the name of the ssh key to attach to the bastion host. Valid values are empty string (do not use SSH keys), a valid SSH key name, or omitted (use the default SSH key name)
 	// +optional
 	SSHKeyName *string `json:"sshKeyName,omitempty"`
 

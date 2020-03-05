@@ -27,6 +27,7 @@ const (
 )
 
 // AWSClusterSpec defines the desired state of AWSCluster
+// +k8s:conversion-gen=false
 type AWSClusterSpec struct {
 	// NetworkSpec encapsulates all things related to AWS network.
 	NetworkSpec NetworkSpec `json:"networkSpec,omitempty"`
@@ -35,7 +36,7 @@ type AWSClusterSpec struct {
 	Region string `json:"region,omitempty"`
 
 	// SSHKeyName is the name of the ssh key to attach to the bastion host.
-	SSHKeyName *string `json:"sshKeyName,omitempty"`
+	SSHKeyName string `json:"sshKeyName,omitempty"`
 
 	// AdditionalTags is an optional set of tags to add to AWS resources managed by the AWS provider, in addition to the
 	// ones added by default.

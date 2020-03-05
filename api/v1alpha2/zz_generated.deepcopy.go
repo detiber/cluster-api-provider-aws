@@ -104,11 +104,6 @@ func (in *AWSClusterList) DeepCopyObject() runtime.Object {
 func (in *AWSClusterSpec) DeepCopyInto(out *AWSClusterSpec) {
 	*out = *in
 	in.NetworkSpec.DeepCopyInto(&out.NetworkSpec)
-	if in.SSHKeyName != nil {
-		in, out := &in.SSHKeyName, &out.SSHKeyName
-		*out = new(string)
-		**out = **in
-	}
 	if in.AdditionalTags != nil {
 		in, out := &in.AdditionalTags, &out.AdditionalTags
 		*out = make(Tags, len(*in))

@@ -40,6 +40,7 @@ type AWSClusterSpec struct {
 	// If empty string, will NOT set an SSH key pair
 	// Otherwise, will set the SSH key pair name
 	// +optional
+	// +k8s:conversion-gen=false
 	SSHKeyName *string `json:"sshKeyName,omitempty"`
 
 	// ControlPlaneEndpoint represents the endpoint used to communicate with the control plane.

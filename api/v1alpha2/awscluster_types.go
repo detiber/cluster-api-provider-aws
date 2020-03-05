@@ -27,7 +27,6 @@ const (
 )
 
 // AWSClusterSpec defines the desired state of AWSCluster
-// +k8s:conversion-gen=false
 type AWSClusterSpec struct {
 	// NetworkSpec encapsulates all things related to AWS network.
 	NetworkSpec NetworkSpec `json:"networkSpec,omitempty"`

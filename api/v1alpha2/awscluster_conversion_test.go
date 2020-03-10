@@ -28,7 +28,7 @@ func TestConvertAWSCluster(t *testing.T) {
 	g := NewWithT(t)
 
 	t.Run("from hub", func(t *testing.T) {
-		t.Run("should restore SSHKeyName, converting a nil value to an empty string", func(t *testing.T) {
+		t.Run("should restore SSHKeyName, retaining a nil value", func(t *testing.T) {
 			src := &infrav1alpha3.AWSCluster{
 				ObjectMeta: metav1.ObjectMeta{},
 				Spec: infrav1alpha3.AWSClusterSpec{
@@ -39,7 +39,7 @@ func TestConvertAWSCluster(t *testing.T) {
 			g.Expect(dst.ConvertFrom(src)).To(Succeed())
 			restored := &infrav1alpha3.AWSCluster{}
 			g.Expect(dst.ConvertTo(restored)).To(Succeed())
-			g.Expect(restored.Spec.SSHKeyName).To(Equal(""))
+			g.Expect(restored.Spec.SSHKeyName).To(BeNil())
 		})
 	})
 
